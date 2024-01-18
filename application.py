@@ -7,34 +7,52 @@ from data_getter import DataGetter
 
 lon = "37.530887"
 lat = "55.703118"
-delta = "0.002"
-
+delta = 0.002
+step = 0.001
 
 class Map(QWidget):
-    def __init__(self, content):
+    def __init__(self):
         super().__init__()
-        self.image = content
+        self.data_getter = DataGetter()
+        self.current_delta = delta
         self.initUI()
 
     def initUI(self):
         self.layout = QVBoxLayout()
-        if self.image is not None:
-            temporary_file_name = "temporary_image_file.jpg"
-            with open(temporary_file_name, "wb") as image_file:
-                image_file.write(self.image)
-            pixmap = QPixmap(temporary_file_name)
-            pixmap = pixmap.scaled(640, 360, aspectRatioMode=Qt.KeepAspectRatio)
-            image_label = QLabel(alignment=Qt.AlignmentFlag.AlignHCenter)
-            image_label.setPixmap(pixmap)
-            self.layout.addWidget(image_label)
+        self.map_widget = self.setup_map_widget(lon, lat, self.current_delta)
+        self.layout.addWidget(self.map_widget)
         self.setLayout(self.layout)
 
+    def setup_map_widget(self, lon, lat, delta):
+        image = self.data_getter.get_map_image(lon, lat, str(delta))
+        temporary_file_name = "temporary_image_file.jpg"
+        with open(temporary_file_name, "wb") as image_file:
+            image_file.write(image)
+        pixmap = QPixmap(temporary_file_name)
+        pixmap = pixmap.scaled(640, 360, aspectRatioMode=Qt.KeepAspectRatio)
+        image_label = QLabel(alignment=Qt.AlignmentFlag.AlignHCenter)
+        image_label.setPixmap(pixmap)
+        return image_label
 
-data_getter = DataGetter()
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key == Qt.Key_Up:
+            self.current_delta += step
+            if self.current_delta > 1:
+                self.current_delta = 1
+        elif key == Qt.Key_Down:
+            self.current_delta -= step
+            if self.current_delta < 0:
+                self.current_delta = 0
+
+        self.layout.removeWidget(self.map_widget)
+        self.map_widget = self.setup_map_widget(lon, lat, self.current_delta)
+        self.layout.addWidget(self.map_widget)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = Map(data_getter.get_map_image(lon, lat, delta))
+    window = Map()
     window.show()
     sys.exit(app.exec())
 
