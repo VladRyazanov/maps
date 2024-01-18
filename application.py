@@ -36,11 +36,11 @@ class Map(QWidget):
 
     def keyPressEvent(self, event):
         key = event.key()
-        if key == Qt.Key_Up:
+        if key == Qt.Key_PageUp:
             self.current_delta += step
             if self.current_delta > 1:
                 self.current_delta = 1
-        elif key == Qt.Key_Down:
+        elif key == Qt.Key_PageDown:
             self.current_delta -= step
             if self.current_delta < 0:
                 self.current_delta = 0
