@@ -5,26 +5,29 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import *
 from data_getter import DataGetter
 
-lon = "37.530887"
-lat = "55.703118"
-delta = 0.002
-step = 0.001
+lon = float(input())
+lat = float(input())
+delta = float(input())
+delta_step = 0.001
+
 
 class Map(QWidget):
     def __init__(self):
         super().__init__()
         self.data_getter = DataGetter()
+        self.current_lon = lon
+        self.current_lat = lat
         self.current_delta = delta
         self.initUI()
 
     def initUI(self):
         self.layout = QVBoxLayout()
-        self.map_widget = self.setup_map_widget(lon, lat, self.current_delta)
+        self.map_widget = self.setup_map_widget(self.current_lon, self.current_lat, self.current_delta)
         self.layout.addWidget(self.map_widget)
         self.setLayout(self.layout)
 
     def setup_map_widget(self, lon, lat, delta):
-        image = self.data_getter.get_map_image(lon, lat, str(delta))
+        image = self.data_getter.get_map_image(str(lon), str(lat), str(delta))
         temporary_file_name = "temporary_image_file.jpg"
         with open(temporary_file_name, "wb") as image_file:
             image_file.write(image)
@@ -37,11 +40,11 @@ class Map(QWidget):
     def keyPressEvent(self, event):
         key = event.key()
         if key == Qt.Key_PageUp:
-            self.current_delta += step
+            self.current_delta += delta_step
             if self.current_delta > 1:
                 self.current_delta = 1
         elif key == Qt.Key_PageDown:
-            self.current_delta -= step
+            self.current_delta -= delta_step
             if self.current_delta < 0:
                 self.current_delta = 0
 
